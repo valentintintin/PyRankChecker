@@ -14,15 +14,17 @@ def check(url, query, start=0):
         position = 0
         google_url = "http://www.google.com/search?q=" + query.replace(' ', '+') + "&start=" + str(start * 10) \
                      + '&num=10&pws=0'
-        print("Checking on page# " + str(start + 1))
+        print("Checking on page #" + str(start + 1))
 
         r = requests.get(google_url, headers=headers, timeout=5)
         soup = BeautifulSoup(r.text, 'lxml')
-        results = soup.select('h3 > a')
+        results = soup.select('#rso > div > div > div > div > a')
         for idx, entry in enumerate(results):
+            print('#' + str(idx + 1) + ' : ' + entry['href'].strip())
             if url in entry['href'].strip():
                 has_found = True
                 position = idx + 1
+                break
 
         if not has_found:
             return [None, start + 1]
@@ -49,7 +51,8 @@ else:
     for i in range(last_page):
         position, page_number = check(args[2], args[1], i)
         if position is not None:
-            print("Found at position " + str(position) + ' on page# ' + str(page_number))
+            print("Found at position " + str(position) + ' on page #' + str(page_number))
             break
-        sleep(5)
-        print(position, page_number)
+        else:
+            print("Nothing on page #" + str(page_number))
+            sleep(1)
